@@ -9,7 +9,7 @@ router = Router()
 
 @router.callback_query(F.data.in_(["new", "old"]))
 async def handle_type(call: CallbackQuery, state: FSMContext):
-    client = F.data
+    client = call.data
     if client == "new":
         await state.set_state(NewClient.district)
         await call.message.answer("Введите район доставки")
