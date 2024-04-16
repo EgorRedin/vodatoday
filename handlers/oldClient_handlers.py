@@ -31,21 +31,29 @@ async def handle_payment(msg: Message, state: FSMContext):
 
 
 #Тут надо дописать, чтобы по нормальному было
+
 @router.message(OldClient.confirm_phone)
 async def handle_confirm(msg: Message, state: FSMContext):
-    phone_number = 81923812
-    if msg.text.lower() in ["да", "нет"]:
+    phone_number = 71923812117
+    if msg.text.lower() not in ["да", "нет"]:
+        await msg.answer("Пожалуйста, ответьте 'да' или 'нет'.")
+    else:
         if msg.text.lower() == "да":
-            await state.update_data(confirm_phone="3892382392") #тут тоже без бд
+            await state.update_data(confirm_phone="3892382392") # тут тоже без бд
             request = await state.get_data()
             request.update({"id": msg.from_user.id})
             db.append(request)
             await state.clear()
             await msg.answer("Ваша заявка принята")
         else:
+            await state.set_state(OldClient.confirm_phone2)
             await msg.answer("Введите ваш актуальный номер телефона")
             await state.update_data(confirm_phone=False)
-    elif re.search(r'^7\s9\d{2}\s\d{3}\s\d{2}\s\d{2}$', msg.text):
+
+@router.message(OldClient.confirm_phone2)
+async def handle_confirm_number(msg: Message, state: FSMContext):
+    phone_number = 71923812117
+    if re.search(r'^7\s9\d{2}\s\d{3}\s\d{2}\s\d{2}$', msg.text):
         await state.update_data(confirm_phone=msg.text)
         request = await state.get_data()
         request.update({"id": msg.from_user.id})
@@ -53,5 +61,5 @@ async def handle_confirm(msg: Message, state: FSMContext):
         await state.clear()
         await msg.answer("Ваш номер телефона изменен")
         await msg.answer("Ваша завяка принята")
-        await msg.answer(f"Я вас не понимаю, Это ваш номер телефона - {phone_number}?",
-                         reply_markup=kb_builder(["Да", "Нет"], [2]))
+    else:
+        await msg.answer('Введите номер телефона в формате 7 999 999 99 99')

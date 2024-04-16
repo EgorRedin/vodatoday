@@ -43,7 +43,7 @@ async def handle_payment(msg: Message, state: FSMContext):
     else:
         await state.update_data(payment=msg.text.lower())
         await state.set_state(NewClient.phone_number)
-        await msg.answer("Введите свой номер телефона - в формате в формате  7 999 999 99 99")
+        await msg.answer("Введите свой номер телефона - в формате 7 999 999 99 99")
 
 
 @router.message(NewClient.phone_number)

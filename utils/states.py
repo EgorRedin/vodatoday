@@ -5,6 +5,7 @@ class OldClient(StatesGroup):
     bank = State()
     payment = State()
     confirm_phone = State()
+    confirm_phone2 = State()
 
 
 class NewClient(StatesGroup):
