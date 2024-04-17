@@ -5,11 +5,14 @@ class OldClient(StatesGroup):
     bank = State()
     payment = State()
     confirm_phone = State()
+    new_phone = State()
 
 
 class NewClient(StatesGroup):
     district = State()
+    phone_number = State()
     volume = State()
     is_not_empty = State()
     payment = State()
-    phone_number = State()
+    time = State()
+    info = State()
