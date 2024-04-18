@@ -1,14 +1,13 @@
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.types import Message
 from keyboards.keyboards import kb_builder
 from aiogram.fsm.context import FSMContext
 from utils.states import NewClient
 import re
-from main import db
+from queries import AsyncORM
 
 
 router = Router()
-
 
 @router.message(NewClient.district)
 async def handle_district(msg: Message, state: FSMContext):
@@ -77,13 +76,26 @@ async def handle_info(msg: Message, state: FSMContext):
         await state.update_data(info="")
         request = await state.get_data()
         request.update({"id": msg.from_user.id})
-        db.append(request)
         await state.clear()
         await msg.answer("Ваша заявка принята")
     else:
         await state.update_data(info=msg.text[:256:])
         request = await state.get_data()
-        request.update({"id": msg.from_user.id})
-        db.append(request)
+        await AsyncORM.insert_users(count=request['volume'],address=request['district'],
+                                    phone_number=request['phone_number'],payment=request['payment'],
+                                    time_del=request['time'],bank = request['is_not_empty'],info=request['info'],
+                                    tg_id=msg.from_user.id)
         await state.clear()
         await msg.answer("Ваша заявка принята")
+
+
+# async def insert_users(count: int, address: str, payment: str, time_del: str, bank: bool, info: str, tg_id: int, phone_number: str):
+
+# class NewClient(StatesGroup):
+#     district = State()
+#     phone_number = State()
+#     volume = State()
+#     is_not_empty = State()
+#     payment = State()
+#     time = State()
+#     info = State()

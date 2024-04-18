@@ -3,7 +3,7 @@ from config_reader import config
 import asyncio
 from callbacks import user_collbacks
 from handlers import *
-db = []
+
 
 
 async def main():

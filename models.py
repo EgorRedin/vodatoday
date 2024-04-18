@@ -7,18 +7,6 @@ import enum
 
 intpk = Annotated[int, mapped_column(autoincrement=True, primary_key=True)]
 
-
-class Payment(enum.Enum):
-    cash = "Наличные"
-    card = "Карта"
-    transaction = "Перевод"
-
-
-class Time(enum.Enum):
-    first_part = "9-12"
-    second_part = "12-18"
-
-
 class User(Base):
     __tablename__ = "users"
     id: Mapped[intpk]
@@ -27,14 +15,19 @@ class User(Base):
     orders: Mapped[list["Order"]] = relationship(back_populates="user")
 
 
+    def __repr__(self):
+        return f'golova: {self.tg_id},{self.orders}'
+
 class Order(Base):
     __tablename__ = "orders"
     id: Mapped[intpk]
-    count: Mapped[int]
+    count: Mapped[int] = mapped_column(nullable=True)
     address: Mapped[str]
-    payment: Mapped[Payment]
-    time: Mapped[Time]
+    payment: Mapped[str]
+    time_del: Mapped[str]
     bank: Mapped[bool]
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    info: Mapped[str_255]
+    info: Mapped[str_255] = mapped_column(nullable=True)
     user: Mapped["User"] = relationship(back_populates="orders")
+    def __repr__(self):
+        return f'greben:  {self.id},{self.address}'

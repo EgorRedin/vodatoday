@@ -6,6 +6,7 @@ class OldClient(StatesGroup):
     payment = State()
     confirm_phone = State()
     new_phone = State()
+    user = State()
 
 
 class NewClient(StatesGroup):
@@ -16,3 +17,4 @@ class NewClient(StatesGroup):
     payment = State()
     time = State()
     info = State()
+

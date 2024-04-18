@@ -10,7 +10,7 @@ engine = create_async_engine(
     echo=True
 )
 
-session = async_sessionmaker(engine)
+session_factory = async_sessionmaker(engine)
 
 str_255 = Annotated[str, 255]
 

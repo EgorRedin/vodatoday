@@ -1,16 +1,19 @@
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.types import Message
 from keyboards.keyboards import kb_builder
 from aiogram.fsm.context import FSMContext
 from utils.states import OldClient
 import re
-from main import db
+from queries import AsyncORM
+from keyboards import keyboards
+from aiogram import Dispatcher
 
 router = Router()
 
 
 @router.message(OldClient.bank)
-async def handle_district(msg: Message, state: FSMContext):
+async def handle_bank(msg: Message, state: FSMContext):
+
     if msg.text.lower() in ["да", "нет"]:
         await state.update_data(bank=(msg.text.lower() == "да"))
         await state.set_state(OldClient.payment)
@@ -21,7 +24,8 @@ async def handle_district(msg: Message, state: FSMContext):
 
 @router.message(OldClient.payment)
 async def handle_payment(msg: Message, state: FSMContext):
-    phone_number = "89447861232"  # тут по идеи берем из БД, но пока нет, так
+    data = await state.get_data()
+    phone_number = data['user'].phone_number
     if msg.text.lower() in ["наличные", "карта", "перевод"]:
         await state.update_data(payment=msg.text)
         await state.set_state(OldClient.confirm_phone)
@@ -34,13 +38,11 @@ async def handle_payment(msg: Message, state: FSMContext):
 
 @router.message(OldClient.confirm_phone)
 async def handle_confirm(msg: Message, state: FSMContext):
-    phone_number = 81923812
+    phone_number = 88005553535
     if msg.text.lower() in ["да", "нет"]:
         if msg.text.lower() == "да":
             await state.update_data(confirm_phone=None)
             request = await state.get_data()
-            request.update({"id": msg.from_user.id})
-            db.append(request)
             await state.clear()
             await msg.answer("Ваша заявка принята")
         else:
@@ -55,12 +57,11 @@ async def handle_new_phone(msg: Message, state: FSMContext):
     if re.search(r'^8\s9\d{2}\s\d{3}\s\d{2}\s\d{2}$', msg.text):
         await state.update_data(confirm_phone=msg.text)
         request = await state.get_data()
-        request.update({"id": msg.from_user.id})
-        db.append(request)
+        await AsyncORM.update_orders(payment=request['payment'],bank = request['bank'],
+                                     tg_id=msg.from_user.id,confirm_phone=request['confirm_phone'])
         await state.clear()
         await msg.answer("Ваш номер телефона обновлен")
         await msg.answer("Ваша заявка принята")
     else:
         await msg.answer("Я вас не понимаю, введите ваш номер телефона в формате - 8 999 999 99 99")
 
-    
