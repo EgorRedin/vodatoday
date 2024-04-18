@@ -14,7 +14,7 @@ async def handle_district(msg: Message, state: FSMContext):
     if msg.text.lower() in ["да", "нет"]:
         await state.update_data(bank=(msg.text.lower() == "да"))
         await state.set_state(OldClient.payment)
-        await msg.answer("Оплата наличными или картой?", reply_markup=kb_builder(["Наличные", "Карта"], [1]))
+        await msg.answer("Оплата наличными или картой?", reply_markup=kb_builder(["Наличные", "Карта", "Перевод"], [1]))
     else:
         await msg.answer("Я вас не понимаю, у вас есть тара?", reply_markup=kb_builder(["Да", "Нет"], [2]))
 
@@ -22,12 +22,14 @@ async def handle_district(msg: Message, state: FSMContext):
 @router.message(OldClient.payment)
 async def handle_payment(msg: Message, state: FSMContext):
     phone_number = "89447861232"  # тут по идеи берем из БД, но пока нет, так
-    if msg.text.lower() in ["наличные", "карта"]:
+    if msg.text.lower() in ["наличные", "карта", "перевод"]:
         await state.update_data(payment=msg.text)
         await state.set_state(OldClient.confirm_phone)
         await msg.answer(f"Это ваш номер телефона - {phone_number}?", reply_markup=kb_builder(["Да", "Нет"], [2]))
     else:
-        await msg.answer("Я вас не понимаю, оплата картой или наличными?", reply_markup=kb_builder(["Наличные", "Карта"], [1]))
+        await msg.answer("Я вас не понимаю, оплата картой или наличными?", reply_markup=kb_builder(["Наличные",
+                                                                                                    "Карта",
+                                                                                                    "Перевод"], [1]))
 
 
 @router.message(OldClient.confirm_phone)

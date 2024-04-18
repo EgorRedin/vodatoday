@@ -8,6 +8,7 @@ db = []
 
 async def main():
     bot = Bot(config.bot_token.get_secret_value())
+
     dp = Dispatcher()
     dp.include_routers(
         user_commands.router,

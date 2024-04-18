@@ -24,7 +24,7 @@ class User(Base):
     id: Mapped[intpk]
     tg_id = mapped_column(BigInteger)
     phone_number: Mapped[str]
-    orders: Mapped[list["Order"]] = relationship()
+    orders: Mapped[list["Order"]] = relationship(back_populates="user")
 
 
 class Order(Base):
@@ -37,4 +37,4 @@ class Order(Base):
     bank: Mapped[bool]
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     info: Mapped[str_255]
-    user: Mapped["User"] = relationship()
+    user: Mapped["User"] = relationship(back_populates="orders")
