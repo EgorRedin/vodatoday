@@ -5,7 +5,6 @@ from callbacks import user_collbacks
 from handlers import *
 
 
-
 async def main():
     bot = Bot(config.bot_token.get_secret_value())
 

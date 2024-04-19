@@ -5,8 +5,7 @@ from aiogram.fsm.context import FSMContext
 from utils.states import OldClient
 import re
 from queries import AsyncORM
-from keyboards import keyboards
-from aiogram import Dispatcher
+
 
 router = Router()
 
@@ -38,17 +37,20 @@ async def handle_payment(msg: Message, state: FSMContext):
 
 @router.message(OldClient.confirm_phone)
 async def handle_confirm(msg: Message, state: FSMContext):
-    phone_number = 88005553535
     if msg.text.lower() in ["да", "нет"]:
         if msg.text.lower() == "да":
             await state.update_data(confirm_phone=None)
             request = await state.get_data()
+            await AsyncORM.update_orders(payment=request['payment'], bank=request['bank'],
+                                         tg_id=msg.from_user.id)
             await state.clear()
             await msg.answer("Ваша заявка принята")
         else:
             await state.set_state(OldClient.new_phone)
             await msg.answer("Введите ваш номер телефона в формате - 8 999 999 99 99")
     else:
+        data = await state.get_data()
+        phone_number = data['user'].phone_number
         await msg.answer(f"Я вас не понимаю, это ваш номер телефона - {phone_number}?",  reply_markup=kb_builder(["Да", "Нет"], [2]))
 
 
@@ -57,8 +59,8 @@ async def handle_new_phone(msg: Message, state: FSMContext):
     if re.search(r'^8\s9\d{2}\s\d{3}\s\d{2}\s\d{2}$', msg.text):
         await state.update_data(confirm_phone=msg.text)
         request = await state.get_data()
-        await AsyncORM.update_orders(payment=request['payment'],bank = request['bank'],
-                                     tg_id=msg.from_user.id,confirm_phone=request['confirm_phone'])
+        await AsyncORM.update_orders(payment=request['payment'], bank=request['bank'],
+                                     tg_id=msg.from_user.id, confirm_phone=request['confirm_phone'])
         await state.clear()
         await msg.answer("Ваш номер телефона обновлен")
         await msg.answer("Ваша заявка принята")

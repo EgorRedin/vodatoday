@@ -73,29 +73,19 @@ async def handle_time(msg: Message, state: FSMContext):
 @router.message(NewClient.info)
 async def handle_info(msg: Message, state: FSMContext):
     if msg.text.lower() == "нет":
-        await state.update_data(info="")
         request = await state.get_data()
-        request.update({"id": msg.from_user.id})
+        await AsyncORM.insert_users(count=request['volume'], address=request['district'],
+                                    phone_number=request['phone_number'], payment=request['payment'],
+                                    time_del=request['time'], bank=request['is_not_empty'], info=None,
+                                    tg_id=msg.from_user.id)
         await state.clear()
         await msg.answer("Ваша заявка принята")
     else:
         await state.update_data(info=msg.text[:256:])
         request = await state.get_data()
         await AsyncORM.insert_users(count=request['volume'],address=request['district'],
-                                    phone_number=request['phone_number'],payment=request['payment'],
-                                    time_del=request['time'],bank = request['is_not_empty'],info=request['info'],
+                                    phone_number=request['phone_number'], payment=request['payment'],
+                                    time_del=request['time'], bank=request['is_not_empty'], info=request['info'],
                                     tg_id=msg.from_user.id)
         await state.clear()
         await msg.answer("Ваша заявка принята")
-
-
-# async def insert_users(count: int, address: str, payment: str, time_del: str, bank: bool, info: str, tg_id: int, phone_number: str):
-
-# class NewClient(StatesGroup):
-#     district = State()
-#     phone_number = State()
-#     volume = State()
-#     is_not_empty = State()
-#     payment = State()
-#     time = State()
-#     info = State()

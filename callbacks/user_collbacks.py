@@ -13,15 +13,21 @@ router = Router()
 @router.callback_query(F.data.in_(["new", "old"]))
 async def handle_type(call: CallbackQuery, state: FSMContext):
     client = call.data
+    user = await AsyncORM.get_user(call.from_user.id)
     if client == "new":
+        if user:
+            await call.message.answer("Вы уже есть в базе данных, авторизуйтесь как старый клиент")
+            await call.message.answer("Здравствуйте, вы старый или новый клиент?", reply_markup=keyboards.start_kb)
+            await call.answer()
+            return
         await state.set_state(NewClient.district)
         await call.message.answer("Введите район доставки")
-        await queries.AsyncORM.create_table()
     else:
-        user = await AsyncORM.get_user(call.from_user.id)
+
         if not user:
-            await call.message.answer('вас нет в базе данных')
+            await call.message.answer('Вас нет в базе данных, авторизуйтесь как новый клиент')
             await call.message.answer("Здравствуйте, вы старый или новый клиент?", reply_markup=keyboards.start_kb)
+            await call.answer()
             return
         await state.update_data(user=user)
         await state.set_state(OldClient.bank)
