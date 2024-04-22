@@ -17,11 +17,19 @@ async def handle_address(msg: Message, state: FSMContext):
         await msg.answer("Выберите один из вариантов ниже", reply_markup=kb_builder(addresses, [1]))
         return
     if msg.text.lower().strip() == "новый адрес":
+        await state.set_state(OldClient.new_address)
         await msg.answer("Введите новый адрес (улица, номер дома, квартира)")
     else:
         await state.update_data(address=msg.text.strip())
         await state.set_state(OldClient.bank)
         await msg.answer("У вас есть тара?", reply_markup=kb_builder(["Да", "Нет"], [2]))
+
+
+@router.message(OldClient.new_address)
+async def handle_new_address(msg: Message, state: FSMContext):
+    await state.update_data(address=msg.text.strip())
+    await state.set_state(OldClient.bank)
+    await msg.answer("У вас есть тара?", reply_markup=kb_builder(["Да", "Нет"], [2]))
 
 
 @router.message(OldClient.bank)
