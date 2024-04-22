@@ -22,12 +22,12 @@ class AsyncORM:
             await session.commit()
 
     @staticmethod
-    async def update_orders(payment: str, bank: bool, tg_id: int, count=0, confirm_phone=None):
+    async def update_orders(payment: str, bank: bool, tg_id: int, address: str, count=0, confirm_phone=None):
         async with session_factory() as session:
             query = (select(User).where(User.tg_id == tg_id).options(selectinload(User.orders)))
             res = await session.execute(query)
             result = res.scalars().one()
-            new_order = Order(payment=payment, bank=bank, address=result.orders[0].address,
+            new_order = Order(payment=payment, bank=bank, address=address,
                               time_del=result.orders[0].time_del, count=count)
             result.orders.append(new_order)
             if confirm_phone:
@@ -37,7 +37,7 @@ class AsyncORM:
     @staticmethod
     async def get_user(tg_id: int):
         async with session_factory() as session:
-            query = select(User).where(User.tg_id == tg_id)
+            query = select(User).where(User.tg_id == tg_id).options(selectinload(User.orders))
             res = await session.execute(query)
             result = res.scalars().first()
         return result

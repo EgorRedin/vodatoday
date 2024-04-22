@@ -27,3 +27,4 @@ class Order(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     info: Mapped[str_255] = mapped_column(nullable=True)
     user: Mapped["User"] = relationship(back_populates="orders")
+

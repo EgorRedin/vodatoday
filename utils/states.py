@@ -2,6 +2,7 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 class OldClient(StatesGroup):
+    address = State()
     bank = State()
     payment = State()
     confirm_phone = State()

@@ -21,15 +21,16 @@ async def handle_type(call: CallbackQuery, state: FSMContext):
             await call.answer()
             return
         await state.set_state(NewClient.district)
-        await call.message.answer("Введите район доставки")
+        await call.message.answer("Введите район доставки (улица, номер дома, квартира)")
     else:
-
         if not user:
             await call.message.answer('Вас нет в базе данных, авторизуйтесь как новый клиент')
             await call.message.answer("Здравствуйте, вы старый или новый клиент?", reply_markup=keyboards.start_kb)
             await call.answer()
             return
         await state.update_data(user=user)
-        await state.set_state(OldClient.bank)
-        await call.message.answer("У вас есть тара?", reply_markup=kb_builder(["Да", "Нет"], [2]))
+        await state.set_state(OldClient.address)
+        addresses = list(set([order.address for order in user.orders][::-1])) + ["Новый адрес"]
+        await state.update_data(address=addresses)
+        await call.message.answer("Выберите адрес доставки", reply_markup=keyboards.kb_builder(addresses, [1]))
     await call.answer()
